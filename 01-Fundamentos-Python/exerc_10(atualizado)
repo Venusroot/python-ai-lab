@@ -1,0 +1,202 @@
+import os
+
+
+# ============================================================
+# FUNÇÃO PARA LIMPAR A TELA
+# ============================================================
+
+def limpar_tela():
+    """Limpa a tela do terminal."""
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+# ============================================================
+# FUNÇÃO PARA ADICIONAR PRODUTOS
+# ============================================================
+
+def adicionar_produtos():
+    """
+    Simula o cliente passando os produtos no caixa.
+
+    O operador informa:
+    - Nome do produto
+    - Valor do produto
+
+    Digite 0 no nome do produto para finalizar.
+    """
+
+    produtos = []
+
+    print('\n========== CAIXA ==========')
+    print('Passe os produtos no caixa.')
+    print('Digite 0 no nome do produto para finalizar.\n')
+
+    while True:
+
+        nome = input('Produto: ')
+
+        # ----------------------------------------------------
+        # SE DIGITAR 0, ENCERRA O WHILE
+        # ----------------------------------------------------
+
+        if nome == '0':
+            break
+
+        # ----------------------------------------------------
+        # NÃO PERMITE NOME VAZIO
+        # ----------------------------------------------------
+
+        if nome.strip() == '':
+            print('Digite o nome do produto.\n')
+            continue
+
+        # ----------------------------------------------------
+        # RECEBE O VALOR DO PRODUTO
+        # ----------------------------------------------------
+
+        while True:
+
+            try:
+
+                valor = float(input('Valor: R$ '))
+
+                if valor <= 0:
+                    print('O valor deve ser maior que zero.\n')
+                    continue
+
+                break
+
+            except ValueError:
+
+                print(
+                    'Valor inválido. '
+                    'Digite um número. Exemplo: 59.90\n'
+                )
+
+        # ----------------------------------------------------
+        # ADICIONA O PRODUTO NA LISTA
+        # ----------------------------------------------------
+
+        produtos.append({
+            'nome': nome,
+            'valor': valor
+        })
+
+        print(f'\n-> {nome} adicionado ao carrinho.')
+        print()
+
+
+    # Retorna todos os produtos para o programa principal
+    return produtos
+
+
+# ============================================================
+# FUNÇÃO PARA CALCULAR O DESCONTO
+# ============================================================
+
+def calcular_desconto(total):
+    """
+    Calcula o desconto de acordo com o valor da compra.
+
+    Até R$ 200,00       = 0%
+    Acima de R$ 200,00  = 5%
+    Acima de R$ 300,00  = 10%
+    """
+
+    if total > 300:
+
+        percentual = 0.10
+
+    elif total > 200:
+
+        percentual = 0.05
+
+    else:
+
+        percentual = 0
+
+
+    # Calcula o valor do desconto
+    desconto = total * percentual
+
+    # Calcula o valor final da compra
+    total_final = total - desconto
+
+    return percentual, desconto, total_final
+
+
+# ============================================================
+# FUNÇÃO PARA ESCOLHER O PAGAMENTO
+# ============================================================
+
+def escolher_pagamento(total):
+    """
+    Permite escolher a forma de pagamento.
+
+    1 - Dinheiro
+    2 - Débito
+    3 - Crédito à vista
+    4 - Crédito parcelado
+    """
+
+    print('\n========== PAGAMENTO ==========')
+
+    print('1 - Dinheiro')
+    print('2 - Cartão de débito')
+    print('3 - Cartão de crédito à vista')
+    print('4 - Cartão de crédito parcelado')
+
+
+    # --------------------------------------------------------
+    # ESCOLHA DA FORMA DE PAGAMENTO
+    # --------------------------------------------------------
+
+    while True:
+
+        opcao = input('\nEscolha a forma de pagamento: ')
+
+        if opcao in ['1', '2', '3', '4']:
+            break
+
+        print('Opção inválida. Escolha entre 1 e 4.')
+
+
+    # ========================================================
+    # PAGAMENTO EM DINHEIRO
+    # ========================================================
+
+    if opcao == '1':
+
+        while True:
+
+            try:
+
+                valor_pago = float(
+                    input('Valor recebido: R$ ')
+                )
+
+                # Verifica se o dinheiro é suficiente
+                if valor_pago < total:
+
+                    falta = total - valor_pago
+
+                    print(
+                        f'Valor insuficiente. '
+                        f'Faltam R$ {falta:.2f}.'
+                    )
+
+                    continue
+
+                # Calcula o troco
+                troco = valor_pago - total
+
+                return (
+                    'Dinheiro',
+                    1,
+                    valor_pago,
+                    troco
+                )
+
+            except ValueError:
+
+                print(
