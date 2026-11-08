@@ -1,0 +1,9 @@
+id,produto,categoria,preco,quantidade
+1,Mouse,Perifericos,50,10
+2,Teclado,Perifericos,150,5
+3,Monitor,Monitores,800,2
+4,Notebook,Computadores,3500,3
+5,Headset,Audio,250,7
+6,Webcam,Video,300,4
+7,Cadeira Gamer,Moveis,1200,2
+8,SSD 1TB,Armazenamento,450,6
