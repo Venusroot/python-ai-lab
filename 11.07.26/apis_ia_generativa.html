@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APIs e suas Funcionalidades em IA Generativa</title>
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            slate: {
+              850: '#0f172a',
+              900: '#090d16',
+              950: '#030712',
+            },
+            brand: {
+              blue: '#38bdf8',
+              indigo: '#818cf8',
+              purple: '#c084fc',
+              emerald: '#34d399',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Estilos Globais e Animações Personalizadas */
+    body {
+      background-color: #030712;
+      color: #f3f4f6;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Container do Apresentador Slide-a-Slide */
+    .slide {
+      display: none;
+      min-height: calc(100vh - 70px);
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Animações dos Diagramas SVG e Fluxos de Rede */
+    @keyframes pulseGlow {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.4));
+      }
+
+      50% {
+        filter: drop-shadow(0 0 24px rgba(56, 189, 248, 0.9));
+      }
+    }
+
+    @keyframes flowPacket {
+      0% {
+        offset-distance: 0%;
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 1;
+      }
+
+      100% {
+        offset-distance: 100%;
+        opacity: 0;
+      }
+    }
+
+    .glow-effect {
+      animation: pulseGlow 3s infinite ease-in-out;
+    }
+
+    /* Estilização da Scrollbar dos painéis de código */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Cartões Glassmorphism Dark */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .glass-card-interactive {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card-interactive:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 25px 50px rgba(56, 189, 248, 0.12);
+    }
+  </style>
+</head>
+
+<body class="flex flex-col min-h-screen">
+
+  <!-- NAVBAR FIXA / MENU SUPERIOR COM ABAS -->
+  <header
+    class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="p-2 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-400">
+        <i class="fa-solid fa-network-wired text-xl"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-white tracking-wide leading-tight">APIs &amp; IA Generativa</h1>
+        <p class="text-xs text-slate-400 hidden sm:block">Engenharia de Software &amp; Arquitetura de Sistemas</p>
+      </div>
+    </div>
+
+    <!-- Navegação de Slides via Menu com Abas -->
+    <nav class="hidden lg:flex items-center gap-1 bg-slate-900/80 p-1.5 rounded-xl border border-slate-800"
+      id="navTabs">
+      <button onclick="goToSlide(0)"
+        class="tab-btn active px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-sky-400 bg-sky-500/10 border border-sky-500/30">
+        Inicio </button>
+      <button onclick="goToSlide(1)"
+        class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all">
+        O que é API </button>
+      <button onclick="goToSlide(2)"
+        class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all">
+        Glossário </button>
+      <button onclick="goToSlide(3)"
+        class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all">
+        Arquitetura </button>
+      <button onclick="goToSlide(4)"
+        class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all">
+        Código Python </button>
+      <button onclick="goToSlide(5)"
+        class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all">
+        Treino x Inferência </button>
+      <button onclick="goToSlide(6)"
+        class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all">
+        Streamlit Chat </button>
+      <button onclick="goToSlide(7)"
+        class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-indigo-400 bg-indigo-500/10 border border-indigo-500/30 hover:bg-indigo-500/20 transition-all"><i
+          class="fa-solid fa-play text-xs mr-1"></i> Simulator </button>
+      <button onclick="goToSlide(8)"
+        class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all">
+        Benefícios </button>
+      <button onclick="goToSlide(9)"
+        class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all">
+        Vídeo &amp; FAQ </button>
+    </nav>
+
+    <!-- Controles de Ação Rápida -->
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-slate-500 font-mono hidden md:inline-block" id="slideCounter">Slide 1 de 10</span>
+      <button onclick="prevSlide()"
+        class="p-2 rounded-lg bg-slate-900 text-slate-300 hover:text-white border border-slate-800 hover:bg-slate-800 transition-all"
+        title="Slide Anterior (Seta Esquerda)">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button onclick="nextSlide()"
+        class="p-2 rounded-lg bg-sky-500 text-slate-950 hover:bg-sky-400 font-bold border border-sky-400 transition-all"
+        title="Próximo Slide (Seta Direita)">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ÁREA PRINCIPAL DOS SLIDES -->
+  <main class="flex-grow flex items-center justify-center p-4 lg:p-8 max-w-7xl mx-auto w-full">
+
+    <!-- SLIDE 1: CAPA -->
+    <section class="slide active flex-col justify-center items-center text-center py-12 w-full">
+      <div
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-sm font-semibold mb-6">
+        <i class="fa-solid fa-microchip"></i> Pesquisa &amp; Métodos em Engenharia de Software
+      </div>
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight max-w-5xl leading-tight mb-6">
+        Como utilizar uma <span
+          class="bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">API</span>
+        com Inteligência Artificial Generativa
+      </h1>
+      <p class="text-lg sm:text-2xl text-slate-300 max-w-3xl mb-10 font-light leading-relaxed">
+        Compreendendo a ponte entre sua aplicação, modelos de Machine Learning, servidores locais (LM Studio) e
+        inferência em tempo real.
+      </p>
+
+      <!-- Grade Visual e Destaques da Capa -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl text-left">
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-l-4 border-l-sky-400">
+          <i class="fa-solid fa-code text-3xl text-sky-400 mb-3"></i>
+          <h3 class="text-lg font-bold text-white mb-1">Aplicações Modernas</h3>
+          <p class="text-sm text-slate-400">Desenvolvimento de chatbots, automações e sistemas desacoplados.</p>
+        </div>
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-l-4 border-l-indigo-400">
+          <i class="fa-solid fa-server text-3xl text-indigo-400 mb-3"></i>
+          <h3 class="text-lg font-bold text-white mb-1">LM Studio Local</h3>
+          <p class="text-sm text-slate-400">Hospedagem local de LLMs com API padrão compatível com OpenAI.</p>
+        </div>
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-l-4 border-l-purple-400">
+          <i class="fa-solid fa-brain text-3xl text-purple-400 mb-3"></i>
+          <h3 class="text-lg font-bold text-white mb-1">Inferência de IA</h3>
+          <p class="text-sm text-slate-400">Consumo direto de modelos pré-treinados (ex: qwen2.5) via requisições HTTP.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: O QUE É API E COMO FUNCIONA -->
+    <section class="slide flex-col justify-center w-full">
+      <div class="mb-8">
+        <span class="text-sky-400 text-sm font-extrabold uppercase tracking-widest">01. Fundamentos Tecnológicos</span>
+        <h2 class="text-3xl sm:text-5xl font-black text-white mt-1">O que é uma API e Como Funciona?</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <!-- Texto explicativo -->
+        <div class="space-y-6">
+          <div class="glass-card p-6 rounded-2xl border-l-4 border-l-sky-400">
+            <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+              <i class="fa-solid fa-layer-group text-sky-400"></i> Application Programming Interface
+            </h3>
+            <p class="text-base text-slate-300 leading-relaxed">
+              Uma API é uma interface que estabelece um **contrato padronizado** para que dois sistemas distintos se
+              comuniquem de forma transparente e segura, sem expor suas complexidades internas.
+            </p>
+          </div>
+
+          <div class="glass-card p-6 rounded-2xl border-l-4 border-l-indigo-400">
+            <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+              <i class="fa-solid fa-utensils text-indigo-400"></i> A Analogia Clássica do Garçom
+            </h3>
+            <p class="text-base text-slate-300 leading-relaxed">
+              Imagine que você é o **Usuário/Cliente**, o menu é o **Prompt/Solicitação**, a cozinha é o **Modelo de
+              IA** e o garçom é a **API**: ele leva o seu pedido no formato correto, entrega ao cozinheiro e retorna com
+              a sua refeição pronta.
+            </p>
+          </div>
+        </div>
+
+        <!-- Diagrama Animado de Comunicação -->
+        <div class="glass-card p-6 rounded-2xl border border-slate-800 flex flex-col items-center justify-center">
+          <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6">Fluxo da Requisição HTTP (Prompt
+            -&gt; Resposta)</h4>
+
+          <div
+            class="w-full flex items-center justify-between gap-2 relative py-8 px-4 bg-slate-900/90 rounded-xl border border-slate-800">
+            <!-- Nó 1: Usuário/App -->
+            <div class="flex flex-col items-center text-center z-10">
+              <div
+                class="w-16 h-16 rounded-2xl bg-sky-500/20 border-2 border-sky-400 flex items-center justify-center text-sky-400 text-2xl mb-2">
+                <i class="fa-solid fa-laptop-code"></i>
+              </div>
+              <span class="text-xs font-bold text-white">Seu Programa</span>
+              <span class="text-[10px] text-slate-400">Solicitação</span>
+            </div>
+
+            <!-- Setas e Animação de Dados -->
+            <div class="flex-grow flex items-center justify-center relative">
+              <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden relative">
+                <div class="w-1/3 h-full bg-gradient-to-r from-sky-400 to-indigo-400 rounded-full animate-pulse"></div>
+              </div>
+              <i class="fa-solid fa-angles-right text-sky-400 text-lg mx-2 animate-bounce"></i>
+            </div>
+
+            <!-- Nó 2: API -->
+            <div class="flex flex-col items-center text-center z-10 glow-effect">
+              <div
+                class="w-16 h-16 rounded-2xl bg-indigo-500/20 border-2 border-indigo-400 flex items-center justify-center text-indigo-400 text-2xl mb-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+              </div>
+              <span class="text-xs font-bold text-white">API</span>
+              <span class="text-[10px] text-slate-400">Intermediário</span>
+            </div>
+
+            <div class="flex-grow flex items-center justify-center relative">
+              <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden relative">
+                <div class="w-1/3 h-full bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full animate-pulse">
+                </div>
+              </div>
+              <i class="fa-solid fa-angles-right text-indigo-400 text-lg mx-2 animate-bounce"></i>
+            </div>
+
+            <!-- Nó 3: IA -->
+            <div class="flex flex-col items-center text-center z-10">
+              <div
+                class="w-16 h-16 rounded-2xl bg-purple-500/20 border-2 border-purple-400 flex items-center justify-center text-purple-400 text-2xl mb-2">
+                <i class="fa-solid fa-brain"></i>
+              </div>
+              <span class="text-xs font-bold text-white">Modelo de IA</span>
+              <span class="text-[10px] text-slate-400">Processamento</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 text-center mt-4">
+            A API isola a sua aplicação da complexidade técnica de carregamento e inferência da rede neural.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: RELAÇÃO COM O CONTEÚDO ESTUDADO -->
+    <section class="slide flex-col justify-center w-full">
+      <div class="mb-8">
+        <span class="text-sky-400 text-sm font-extrabold uppercase tracking-widest">02. Mapeamento de Conceitos</span>
+        <h2 class="text-3xl sm:text-5xl font-black text-white mt-1">Conceitos Fundamentais em IA</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Prompt -->
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-t-4 border-t-sky-400">
+          <div class="flex items-center gap-3 mb-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg font-bold">
+              1</div>
+            <h3 class="text-xl font-bold text-white">Prompt</h3>
+          </div>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Instrução textual fornecida pelo usuário que é empacotada em uma estrutura JSON para ser enviada à API.
+          </p>
+        </div>
+
+        <!-- Processamento -->
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-t-4 border-t-indigo-400">
+          <div class="flex items-center gap-3 mb-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg font-bold">
+              2</div>
+            <h3 class="text-xl font-bold text-white">Processamento</h3>
+          </div>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            A análise efetuada pelo modelo de IA, tokenizando a entrada e avaliando a intenção do usuário.
+          </p>
+        </div>
+
+        <!-- Inferência -->
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-t-4 border-t-purple-400">
+          <div class="flex items-center gap-3 mb-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg font-bold">
+              3</div>
+            <h3 class="text-xl font-bold text-white">Inferência</h3>
+          </div>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Uso do conhecimento pré-treinado do modelo para prever e gerar os tokens subsequentes em tempo real.
+          </p>
+        </div>
+
+        <!-- Geração -->
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-t-4 border-t-emerald-400">
+          <div class="flex items-center gap-3 mb-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg font-bold">
+              4</div>
+            <h3 class="text-xl font-bold text-white">Geração</h3>
+          </div>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Produção do conteúdo final (texto, código, respostas estruturadas) retornado como payload via API.
+          </p>
+        </div>
+
+        <!-- Treinamento -->
+        <div
+          class="glass-card glass-card-interactive p-6 rounded-2xl border-t-4 border-t-amber-400 md:col-span-2 lg:col-span-2">
+          <div class="flex items-center gap-3 mb-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg font-bold">
+              5</div>
+            <h3 class="text-xl font-bold text-white">Treinamento (Pré-requisito)</h3>
+          </div>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Etapa prévia e intensiva de ajuste de bilhões de parâmetros com grandes volumes de dados. **Importante:** O
+            consumo via API realiza apenas a **Inferência**, não o treinamento offline do modelo.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: ARQUITETURA COM LM STUDIO -->
+    <section class="slide flex-col justify-center w-full">
+      <div class="mb-6">
+        <span class="text-sky-400 text-sm font-extrabold uppercase tracking-widest">03. Arquitetura de Sistemas</span>
+        <h2 class="text-3xl sm:text-5xl font-black text-white mt-1">Servidor Local com LM Studio</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Explicação -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="glass-card p-6 rounded-2xl border-l-4 border-l-sky-400">
+            <h3 class="text-lg font-bold text-white mb-2">Hospedagem Local com LM Studio</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              O **LM Studio** disponibiliza um servidor web local com uma API HTTP totalmente compatível com a
+              especificação da **OpenAI**.
+            </p>
+          </div>
+          <div class="glass-card p-6 rounded-2xl border-l-4 border-l-emerald-400">
+            <h3 class="text-lg font-bold text-white mb-2">Endpoint Local Configurado</h3>
+            <p class="text-xs font-mono text-emerald-400 bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+              http://127.0.0.1:1234/v1
+            </p>
+            <p class="text-xs text-slate-400 mt-2">
+              Sua aplicação envia requisições diretamente para a porta local `1234` sem depender de serviços externos na
+              nuvem.
+            </p>
+          </div>
+        </div>
+
+        <!-- Visualizador da Arquitetura -->
+        <div class="lg:col-span-7 glass-card p-6 rounded-2xl border border-slate-800">
+          <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6 text-center">Diagrama de
+            Conectividade de Arquitetura</h3>
+
+          <div class="flex flex-col gap-4">
+            <!-- Camada 1: Código -->
+            <div class="flex items-center justify-between bg-slate-900 p-4 rounded-xl border border-sky-500/30">
+              <div class="flex items-center gap-3">
+                <i class="fa-brands fa-python text-2xl text-sky-400"></i>
+                <div>
+                  <h4 class="text-sm font-bold text-white">Aplicação Python</h4>
+                  <p class="text-xs text-slate-400">Biblioteca `openai` ou `requests`</p>
+                </div>
+              </div>
+              <span
+                class="text-xs font-mono bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full border border-sky-500/30">Client
+                HTTP</span>
+            </div>
+
+            <!-- Conector 1 -->
+            <div class="flex justify-center my-[-8px]">
+              <div class="flex items-center gap-2 text-xs font-mono text-slate-500">
+                <i class="fa-solid fa-arrow-down-long text-sky-400 animate-bounce"></i> Request POST
+                /v1/chat/completions
+              </div>
+            </div>
+
+            <!-- Camada 2: Servidor API -->
+            <div class="flex items-center justify-between bg-slate-900 p-4 rounded-xl border border-indigo-500/30">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-server text-2xl text-indigo-400"></i>
+                <div>
+                  <h4 class="text-sm font-bold text-white">Servidor LM Studio</h4>
+                  <p class="text-xs text-slate-400">Localhost:1234 (API Compatibility Layer)</p>
+                </div>
+              </div>
+              <span
+                class="text-xs font-mono bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30">REST
+                Endpoint</span>
+            </div>
+
+            <!-- Conector 2 -->
+            <div class="flex justify-center my-[-8px]">
+              <div class="flex items-center gap-2 text-xs font-mono text-slate-500">
+                <i class="fa-solid fa-arrow-down-long text-indigo-400 animate-bounce"></i> Injeção de Tensor na GPU/CPU
+              </div>
+            </div>
+
+            <!-- Camada 3: Modelo -->
+            <div class="flex items-center justify-between bg-slate-900 p-4 rounded-xl border border-purple-500/30">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-brain text-2xl text-purple-400"></i>
+                <div>
+                  <h4 class="text-sm font-bold text-white">Modelo de IA Carregado</h4>
+                  <p class="text-xs text-slate-400">qwen2.5-1.5b-instruct / Llama-3</p>
+                </div>
+              </div>
+              <span
+                class="text-xs font-mono bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30">LLM
+                Local</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: CÓDIGO PYTHON PRÁTICO -->
+    <section class="slide flex-col justify-center w-full">
+      <div class="mb-6">
+        <span class="text-sky-400 text-sm font-extrabold uppercase tracking-widest">04. Implementação</span>
+        <h2 class="text-3xl sm:text-5xl font-black text-white mt-1">Exemplo de Código em Python</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <!-- Editor de Código -->
+        <div
+          class="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+          <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+              <span class="text-xs font-mono text-slate-400 ml-2">app_lmstudio.py</span>
+            </div>
+            <span class="text-xs font-mono text-sky-400">Python 3.10+</span>
+          </div>
+          <pre
+            class="p-5 font-mono text-sm leading-relaxed overflow-x-auto text-slate-200 flex-grow"><code><span class="text-rose-400">from</span> openai <span class="text-rose-400">import</span> OpenAI
+
+<span class="text-slate-500"># Conecta à API do LM Studio (Servidor Local)</span>
+client = OpenAI(
+    base_url=<span class="text-emerald-300">"http://127.0.0.1:1234/v1"</span>,
+    api_key=<span class="text-emerald-300">"lm-studio"</span>
+)
+
+<span class="text-slate-500"># Envia a solicitação do prompt para a API</span>
+resposta = client.chat.completions.create(
+    model=<span class="text-emerald-300">"qwen2.5-1.5b-instruct"</span>,
+    messages=[
+        {<span class="text-emerald-300">"role"</span>: <span class="text-emerald-300">"system"</span>, <span class="text-emerald-300">"content"</span>: <span class="text-emerald-300">"Você é um professor de IA."</span>},
+        {<span class="text-emerald-300">"role"</span>: <span class="text-emerald-300">"user"</span>, <span class="text-emerald-300">"content"</span>: <span class="text-emerald-300">"Explique o que é IA generativa."</span>}
+    ],
+    temperature=<span class="text-amber-300">0.7</span>
+)
+
+<span class="text-slate-500"># Exibe a resposta gerada pelo modelo</span>
+<span class="text-sky-400">print</span>(resposta.choices[<span class="text-amber-300">0</span>].message.content)</code></pre>
+        </div>
+
+        <!-- Anotações Explicativas -->
+        <div class="lg:col-span-5 flex flex-col gap-4 justify-between">
+          <div class="glass-card p-5 rounded-2xl border-l-4 border-l-sky-400">
+            <h4 class="text-sm font-bold text-white mb-1">1. `base_url` customizado</h4>
+            <p class="text-xs text-slate-300">Redireciona as requisições HTTP para a porta local `1234` em vez dos
+              servidores padrão da OpenAI.</p>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl border-l-4 border-l-indigo-400">
+            <h4 class="text-sm font-bold text-white mb-1">2. `model` (ID do Modelo)</h4>
+            <p class="text-xs text-slate-300">Identificador exato do modelo carregado no LM Studio (ex:
+              `qwen2.5-1.5b-instruct`).</p>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl border-l-4 border-l-purple-400">
+            <h4 class="text-sm font-bold text-white mb-1">3. Estrutura de `messages`</h4>
+            <p class="text-xs text-slate-300">Array de objetos com o papel (`system`, `user`, `assistant`) que define o
+              contexto do diálogo.</p>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl border-l-4 border-l-emerald-400">
+            <h4 class="text-sm font-bold text-white mb-1">4. Hiperparâmetro `temperature`</h4>
+            <p class="text-xs text-slate-300">Controla a aleatoriedade da geração (valores mais baixos geram respostas
+              mais determinísticas).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: FLUXO COMPLETO - TREINAMENTO VS INFERÊNCIA -->
+    <section class="slide flex-col justify-center w-full">
+      <div class="mb-6">
+        <span class="text-sky-400 text-sm font-extrabold uppercase tracking-widest">05. Comparativo Técnico</span>
+        <h2 class="text-3xl sm:text-5xl font-black text-white mt-1">Treinamento vs. Inferência via API</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Treinamento -->
+        <div class="glass-card p-8 rounded-2xl border-t-4 border-t-slate-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span
+                class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-slate-800 text-slate-300">Processo
+                Offline</span>
+              <i class="fa-solid fa-gears text-3xl text-slate-400"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4">Treinamento (Machine Learning)</h3>
+            <ul class="space-y-3 text-sm text-slate-300">
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-check text-slate-400 mt-1"></i>
+                <span>Envolve o carregamento de **dados massivos** (Datasets).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-check text-slate-400 mt-1"></i>
+                <span>Exige alto poder computacional e semanas em clusters de GPUs.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-check text-slate-400 mt-1"></i>
+                <span>Gera os pesos do **Modelo Treinado** final.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500">
+            Realizado de forma pontual antes da disponibilização do modelo.
+          </div>
+        </div>
+
+        <!-- Inferência -->
+        <div class="glass-card p-8 rounded-2xl border-t-4 border-t-sky-400 bg-sky-950/10 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span
+                class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">Processo
+                Online (API)</span>
+              <i class="fa-solid fa-bolt text-3xl text-sky-400 animate-pulse"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4">Inferência (Uso da API)</h3>
+            <ul class="space-y-3 text-sm text-slate-200">
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-check text-sky-400 mt-1"></i>
+                <span>O usuário envia um **Prompt** via requisição HTTP.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-check text-sky-400 mt-1"></i>
+                <span>O modelo processa o padrão aprendido e gera a resposta em tempo real.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fa-solid fa-check text-sky-400 mt-1"></i>
+                <span>É o modo utilizado na integração com aplicações (Streamlit, Web, Apps).</span>
+              </li>
+            </ul>
+          </div>
+          <div class="mt-6 pt-4 border-t border-sky-900/50 text-xs text-sky-400 font-semibold">
+            <i class="fa-solid fa-lightbulb mr-1"></i> No uso da API, faz-se INFERÊNCIA, não treinamento!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: CHATBOT COM STREAMLIT -->
+    <section class="slide flex-col justify-center w-full">
+      <div class="mb-6">
+        <span class="text-sky-400 text-sm font-extrabold uppercase tracking-widest">06. Aplicação Web</span>
+        <h2 class="text-3xl sm:text-5xl font-black text-white mt-1">Chatbot Interativo com Streamlit</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <!-- Texto explicativo -->
+        <div class="space-y-4">
+          <div class="glass-card p-6 rounded-2xl border-l-4 border-l-rose-500">
+            <h3 class="text-xl font-bold text-white mb-2">Interface em Tempo Real</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              O **Streamlit** permite criar interfaces web em Python em poucas linhas de código. Ele consome a API do LM
+              Studio para enviar o prompt do usuário e exibir o fluxo da resposta.
+            </p>
+          </div>
+
+          <div class="glass-card p-6 rounded-2xl border border-slate-800">
+            <h4 class="text-sm font-bold text-slate-300 mb-3">Sintaxe do Streamlit com Chat API:</h4>
+            <pre class="bg-slate-950 p-3 rounded-lg font-mono text-xs text-slate-300 overflow-x-auto"><code>import streamlit as st
+
+prompt = st.chat_input("Digite sua mensagem...")
+if prompt:
+    # Envia prompt via API para o LM Studio
+    response = client.chat.completions.create(...)
+    st.write(response.choices[0].message.content)</code></pre>
+          </div>
+        </div>
+
+        <!-- Simulação Visual do Chatbot Streamlit -->
+        <div class="glass-card p-6 rounded-2xl border border-slate-800 bg-slate-900/90 shadow-2xl">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+              <span class="text-xs font-bold text-white">Streamlit Chatbot UI</span>
+            </div>
+            <span
+              class="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded font-mono">http://localhost:8501</span>
+          </div>
+
+          <!-- Janela de Chat Simulada -->
+          <div class="space-y-4 mb-4 text-xs font-sans max-h-64 overflow-y-auto p-2">
+            <!-- Balão Usuário -->
+            <div class="flex gap-3 justify-end">
+              <div class="bg-sky-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%]">
+                Como utilizar uma API para se conectar a um modelo de IA local?
+              </div>
+              <div
+                class="w-8 h-8 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold flex-shrink-0">
+                U
+              </div>
+            </div>
+
+            <!-- Balão Bot -->
+            <div class="flex gap-3 justify-start">
+              <div
+                class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold flex-shrink-0">
+                IA
+              </div>
+              <div
+                class="bg-slate-800 text-slate-200 p-3 rounded-2xl rounded-tl-none border border-slate-700 max-w-[80%] space-y-2">
+                <p>Para se conectar a um modelo local via API:</p>
+                <ol class="list-decimal list-inside space-y-1 text-slate-300">
+                  <li>Inicie o servidor local no **LM Studio**.</li>
+                  <li>Instale o cliente `openai` em Python.</li>
+                  <li>Configure o `base_url` para `http://127.0.0.1:1234/v1`.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input Simulado -->
+          <div class="relative">
+            <input type="text" disabled value="Digite sua pergunta aqui..."
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-500 pr-10">
+            <button class="absolute right-2 top-2 text-sky-400 p-1"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: SIMULADOR INTERATIVO / PLAYGROUND DE API -->
+    <section class="slide flex-col justify-center w-full">
+      <div class="mb-4">
+        <span class="text-indigo-400 text-sm font-extrabold uppercase tracking-widest"><i
+            class="fa-solid fa-flask mr-1"></i>07. Playground Prático</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mt-1">Simulador Interativo de Requisição API</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Form de Teste -->
+        <div class="lg:col-span-5 glass-card p-5 rounded-2xl border border-slate-800 space-y-4">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Escolha o Modelo:</label>
+            <select id="simModel"
+              class="w-full bg-slate-950 border border-slate-800 text-xs text-sky-400 rounded-xl p-2.5 font-mono focus:outline-none focus:border-sky-500">
+              <option value="qwen2.5-1.5b-instruct">qwen2.5-1.5b-instruct (LM Studio Local)</option>
+              <option value="gpt-4o-mini">gpt-4o-mini (OpenAI Cloud API)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Prompt do Usuário:</label>
+            <textarea id="simPrompt" rows="3"
+              class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-200 rounded-xl p-3 focus:outline-none focus:border-sky-500 font-sans">O que é uma API em Engenharia de Software?</textarea>
+          </div>
+
+          <div class="flex items-center justify-between gap-4">
+            <div class="w-1/2">
+              <label class="text-[11px] text-slate-400 block mb-1">Temperature: <span id="tempVal"
+                  class="text-sky-400 font-mono">0.7</span></label>
+              <input type="range" id="simTemp" min="0" max="1" step="0.1" value="0.7"
+                oninput="document.getElementById('tempVal').innerText = this.value" class="w-full accent-sky-400">
+            </div>
+            <button onclick="runApiSimulation()"
+              class="w-1/2 bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-slate-950 font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+              <i class="fa-solid fa-play"></i> Enviar HTTP POST
+            </button>
+          </div>
+        </div>
+
+        <!-- Painel de Inspeção JSON (Request e Response) -->
+        <div class="lg:col-span-7 glass-card p-5 rounded-2xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Payload de Inspeção da API
+              (JSON)</span>
+            <span id="simStatus"
+              class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">HTTP
+              Status: 200 OK</span>
+          </div>
+
+          <!-- Payload Request -->
+          <div>
+            <span class="text-[10px] font-mono text-sky-400 block mb-1">--- Request POST /v1/chat/completions ---</span>
+            <pre
+              class="bg-slate-950 p-3 rounded-lg font-mono text-[11px] text-slate-300 overflow-x-auto max-h-32 border border-slate-900"
+              id="jsonRequest"><code>// Clique em "Enviar HTTP POST" para gerar o JSON</code></pre>
+          </div>
+
+          <!-- Payload Response -->
+          <div>
+            <span class="text-[10px] font-mono text-emerald-400 block mb-1">--- Response Payload (200 OK) ---</span>
+            <pre
+              class="bg-slate-950 p-3 rounded-lg font-mono text-[11px] text-emerald-300 overflow-x-auto max-h-40 border border-slate-900"
+              id="jsonResponse"><code>// Resposta gerada pela API aparecerá aqui</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: BENEFÍCIOS DE USAR API -->
+    <section class="slide flex-col justify-center w-full">
+      <div class="mb-8">
+        <span class="text-sky-400 text-sm font-extrabold uppercase tracking-widest">08. Vantagens Estratégicas</span>
+        <h2 class="text-3xl sm:text-5xl font-black text-white mt-1">Benefícios de Usar uma API</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-l-4 border-l-sky-400">
+          <div class="w-12 h-12 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-2xl mb-4">
+            <i class="fa-solid fa-unlock-keyhole"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Acesso Fácil a Modelos</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Permite integrar recursos avançados de IA sem a necessidade de construir e treinar modelos do zero.
+          </p>
+        </div>
+
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-l-4 border-l-indigo-400">
+          <div
+            class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-2xl mb-4">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Integração Rápida</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Adicione inteligência a sistemas legados em poucas horas utilizando bibliotecas padrão em Python ou JS.
+          </p>
+        </div>
+
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-l-4 border-l-purple-400">
+          <div
+            class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl mb-4">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Alta Escalabilidade</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Suporta o crescimento no volume de requisições sem alterar a estrutura básica do seu código.
+          </p>
+        </div>
+
+        <div class="glass-card glass-card-interactive p-6 rounded-2xl border-l-4 border-l-emerald-400">
+          <div
+            class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mb-4">
+            <i class="fa-solid fa-arrows-rotate"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Atualizações Contínuas</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Troque o modelo subjacente (ex: de Llama-2 para Llama-3) apenas alterando uma linha no código da API.
+          </p>
+        </div>
+
+        <div
+          class="glass-card glass-card-interactive p-6 rounded-2xl border-l-4 border-l-amber-400 md:col-span-2 lg:col-span-2">
+          <div
+            class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-4">
+            <i class="fa-solid fa-piggy-bank"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Redução de Custos e Time-to-Market</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Elimina investimentos milionários em infraestrutura pesada de hardware, acelerando drasticamente o
+            lançamento de novas funcionalidades no mercado.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: VÍDEO EXPLICATIVO & CONCLUSÃO -->
+    <section class="slide flex-col justify-center w-full">
+      <div class="mb-6">
+        <span class="text-sky-400 text-sm font-extrabold uppercase tracking-widest">09. Demonstração &amp;
+          Encerramento</span>
+        <h2 class="text-3xl sm:text-5xl font-black text-white mt-1">Vídeo Explicativo e Conclusão</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Iframe com Vídeo Explicativo do YouTube -->
+        <div class="lg:col-span-7 glass-card p-3 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+          <div class="relative w-full pb-[56.25%] rounded-xl overflow-hidden bg-slate-950">
+            <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/jB3d89cvst8"
+              title="Demonstração Prática de API com LM Studio" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+          </div>
+          <p class="text-xs text-slate-400 text-center mt-3 mb-1">
+            <i class="fa-brands fa-youtube text-red-500 mr-1"></i> Vídeo explicativo demonstrando a execução do servidor
+            LM Studio e chamadas HTTP.
+          </p>
+        </div>
+
+        <!-- Resumo Final & FAQ -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="glass-card p-6 rounded-2xl border-l-4 border-l-sky-400">
+            <h3 class="text-lg font-bold text-white mb-2">Resumo em Uma Frase</h3>
+            <p class="text-base text-slate-200 italic leading-relaxed">
+              "Uma API permite que sua aplicação se comunique com um modelo de inteligência artificial enviando prompts
+              e recebendo respostas geradas pelo modelo."
+            </p>
+          </div>
+
+          <div class="glass-card p-6 rounded-2xl border border-slate-800 text-center py-8">
+            <i class="fa-solid fa-comments text-4xl text-sky-400 mb-3"></i>
+            <h3 class="text-2xl font-black text-white mb-2">Perguntas ou Dúvidas?</h3>
+            <p class="text-sm text-slate-400 mb-4">
+              Obrigado por acompanhar esta apresentação sobre APIs e IA Generativa!
+            </p>
+            <div
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-bold">
+              Engenharia de Software • 2026
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- RODAPÉ DE NAVEGAÇÃO PASSIVA -->
+  <footer
+    class="bg-slate-950/90 border-t border-slate-800 px-6 py-3 flex items-center justify-between text-xs text-slate-500">
+    <div>
+      Apresentação desenvolvida com HTML, Tailwind CSS &amp; JavaScript
+    </div>
+    <div class="flex items-center gap-4">
+      <span><i class="fa-solid fa-keyboard mr-1"></i> Use as setas do teclado (← / →) para navegar</span>
+    </div>
+  </footer>
+
+  <!-- LÓGICA DE NAVEGAÇÃO E SIMULADOR JAVASCRIPT -->
+  <script>
+    // Estado do Apresentador de Slides
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const slideCounter = document.getElementById('slideCounter');
+
+    function updateSlideUI() {
+      // Atualiza visibilidade dos slides
+      slides.forEach((slide, idx) => {
+        if (idx === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      // Atualiza estado visual das abas no menu superior
+      tabButtons.forEach((btn, idx) => {
+        if (idx === currentSlide) {
+          btn.className = 'tab-btn active px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-sky-400 bg-sky-500/10 border border-sky-500/30';
+        } else {
+          btn.className = 'tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all';
+        }
+      });
+
+      // Atualiza contador
+      slideCounter.innerText = `Slide ${currentSlide + 1} de ${slides.length}`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < slides.length) {
+        currentSlide = index;
+        updateSlideUI();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        updateSlideUI();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlideUI();
+      }
+    }
+
+    // Suporte a teclas de atalho (Setas para esquerda e direita)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      }
+    });
+
+    // Lógica do Simulador Interativo / Playground de API
+    function runApiSimulation() {
+      const model = document.getElementById('simModel').value;
+      const prompt = document.getElementById('simPrompt').value;
+      const temp = parseFloat(document.getElementById('simTemp').value);
+
+      const jsonRequestElem = document.getElementById('jsonRequest');
+      const jsonResponseElem = document.getElementById('jsonResponse');
+      const simStatusElem = document.getElementById('simStatus');
+
+      // Monta objeto de Request
+      const requestPayload = {
+        model: model,
+        messages: [
+          { role: "system", content: "Você é um assistente especialista em Engenharia de Software." },
+          { role: "user", content: prompt }
+        ],
+        temperature: temp,
+        max_tokens: 150
+      };
+
+      jsonRequestElem.innerText = JSON.stringify(requestPayload, null, 2);
+
+      // Simulação de tempo de resposta da API
+      simStatusElem.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse';
+      simStatusElem.innerText = 'HTTP Status: 102 Processing...';
+      jsonResponseElem.innerText = '// Aguardando resposta da API...';
+
+      setTimeout(() => {
+        // Resposta simulada baseada na pergunta
+        let generatedText = "Uma API (Application Programming Interface) é um conjunto de rotinas e padrões de programação para acesso a um aplicativo de software ou plataforma web.";
+        if (prompt.toLowerCase().includes("ia") || prompt.toLowerCase().includes("generativa")) {
+          generatedText = "Na IA Generativa, a API serve como ponte para transmitir prompts ao modelo e retornar o conteúdo gerado em tempo real via inferência.";
+        }
+
+        const responsePayload = {
+          id: "chatcmpl-" + Math.random().toString(36).substring(2, 9),
+          object: "chat.completion",
+          created: Math.floor(Date.now() / 1000),
+          model: model,
+          choices: [
+            {
+              index: 0,
+              message: {
+                role: "assistant",
+                content: generatedText
+              },
+              finish_reason: "stop"
+            }
+          ],
+          usage: {
+            prompt_tokens: 24,
+            completion_tokens: 38,
+            total_tokens: 62
+          }
+        };
+
+        jsonResponseElem.innerText = JSON.stringify(responsePayload, null, 2);
+        simStatusElem.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        simStatusElem.innerText = 'HTTP Status: 200 OK';
+      }, 600);
+    }
+
+    // Executa uma simulação inicial ao carregar
+    window.onload = function () {
+      runApiSimulation();
+    };
+  </script>
+</body>
+
+</html>
